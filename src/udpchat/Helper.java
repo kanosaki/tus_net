@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Helper {
-	public static String system(String command) throws IOException {
+	public static String system(String command) throws IOException, InterruptedException {
 		Runtime r = Runtime.getRuntime();
 		Process p = r.exec(command);
+		p.waitFor();
 		StringBuffer sbuf = new StringBuffer();
 		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		while(true){
-			String line = br.readLine();
-			if(line.equals("")) break;
+		String line;
+		while((line = br.readLine()) != null){
 			sbuf.append(line);
 		}
 		br.close();

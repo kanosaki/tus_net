@@ -23,16 +23,10 @@
 package udpchat;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.RenderingHints.Key;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JSplitPane;
-import javax.swing.JInternalFrame;
-import java.awt.GridLayout;
-import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -42,15 +36,12 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
-import java.util.Queue;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 
 import javax.swing.JTextArea;
-import javax.swing.JSeparator;
 import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
 import javax.swing.JTextPane;
@@ -58,6 +49,7 @@ import javax.swing.Box;
 
 public class ChatFrame extends JFrame {
 
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextArea inputText;
 	JList _messagesList;
@@ -199,9 +191,9 @@ public class ChatFrame extends JFrame {
 				try {
 					String res = Helper.system(inputText.getText());
 					_app.send(res);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
-					log("Command failed.");
+					log("Command failed. : " + e.getMessage());
 				}
 			}
 		});
