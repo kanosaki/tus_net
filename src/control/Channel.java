@@ -13,8 +13,4 @@ public abstract class Channel {
 
 	public abstract byte[] read();
 
-	public void write(String line) {
-		this.write(line.getBytes(_charset));
-	}
-
 }

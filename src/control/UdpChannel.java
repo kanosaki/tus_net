@@ -1,5 +1,8 @@
 package control;
 
-public class UdpChannel {
+import java.nio.ByteBuffer;
 
+public class UdpChannel {
+	void hoge(){
+	}
 }
