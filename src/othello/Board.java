@@ -1,5 +1,7 @@
 package othello;
 
+import java.awt.Color;
+
 public class Board {
 	public static final int SIZE = 8;
 	public static final int CELLS = SIZE * SIZE;
@@ -7,14 +9,26 @@ public class Board {
 
 	public Board() {
 		_board = new CellState[SIZE][SIZE];
+		this.setInitialState();
+	}
+
+	protected void setInitialState() {
+		this.put(3, 3, CellState.Black);
+		this.put(4, 4, CellState.Black);
+		this.put(3, 4, CellState.White);
+		this.put(4, 3, CellState.White);
 	}
 
 	public CellState get(int x, int y) {
-		return _board[x][y];
+		CellState st = _board[x][y];
+		if (st != null)
+			return st;
+		else
+			return CellState.Void;
 	}
 
 	/**
-	 * Same as set, but value will be checked. 
+	 * Same as set, but value will be checked.
 	 */
 	public void put(int x, int y, CellState state) {
 		if (state == null)
@@ -23,11 +37,15 @@ public class Board {
 			throw new IllegalArgumentException("Void state is not allowed");
 		this.set(x, y, state);
 	}
-	
+
+	public boolean hasStone(int x, int y) {
+		return _board[x][y] != null && _board[x][y] != CellState.Void;
+	}
+
 	/**
 	 * Simply set state to board. If you need value checking, use put method.
 	 */
-	public void set(int x, int y, CellState state) {
+	void set(int x, int y, CellState state) {
 		_board[x][y] = state;
 	}
 
@@ -50,6 +68,19 @@ public class Board {
 				throw new UnsupportedOperationException("Not implemented");
 			}
 
+		}
+
+		public Color getColor() {
+			switch (this) {
+			case Void:
+				return Color.RED;
+			case Black:
+				return Color.BLACK;
+			case White:
+				return Color.WHITE;
+			default:
+				return Color.RED;
+			}
 		}
 	}
 

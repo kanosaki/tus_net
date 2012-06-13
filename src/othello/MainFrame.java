@@ -1,0 +1,130 @@
+package othello;
+
+import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
+public class MainFrame extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel _contentPane;
+	private JTextField tf;
+	private JTextArea ta;
+	private JLabel label;
+	private BoardView canvas;
+	private JPanel _panel;
+	private JTextArea _logTextArea;
+	private JMenuBar _menuBar;
+	private JMenu _menu;
+	private JMenuItem _connectMenuItem;
+	private JMenu _viewMenuItem;
+	private JCheckBoxMenuItem _checkBoxMenuItem;
+	private JMenu _exportMenuItem;
+	private JMenu _exportChatLogMenuItem;
+	private JCheckBoxMenuItem _autoPilotCheckBoxMenuItem;
+	private JSeparator _separator;
+
+	public MainFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+
+		_menuBar = new JMenuBar();
+		setJMenuBar(_menuBar);
+
+		_menu = new JMenu("Game");
+		_menuBar.add(_menu);
+
+		_connectMenuItem = new JMenuItem("Connect...");
+		_menu.add(_connectMenuItem);
+
+		_separator = new JSeparator();
+		_menu.add(_separator);
+
+		_autoPilotCheckBoxMenuItem = new JCheckBoxMenuItem("Auto Pilot");
+		_menu.add(_autoPilotCheckBoxMenuItem);
+
+		_exportMenuItem = new JMenu("Export");
+		_menu.add(_exportMenuItem);
+
+		_exportChatLogMenuItem = new JMenu("Chat log");
+		_exportMenuItem.add(_exportChatLogMenuItem);
+
+		_viewMenuItem = new JMenu("View");
+		_menuBar.add(_viewMenuItem);
+
+		_checkBoxMenuItem = new JCheckBoxMenuItem("Debug mode");
+		_checkBoxMenuItem.setSelected(true);
+		_checkBoxMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				setDebugMode(_checkBoxMenuItem.isSelected());
+			}
+		});
+
+		_viewMenuItem.add(_checkBoxMenuItem);
+		_contentPane = new JPanel();
+		_contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		_contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(_contentPane);
+		this.setSize(640, 640);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		tf = new JTextField(40);
+		tf.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				tf.setText("");
+			}
+		});
+		ta = new JTextArea(18, 40);
+		ta.setLineWrap(true);
+		ta.setEditable(false);
+
+		JPanel mainp = (JPanel) getContentPane();
+		JPanel ep = new JPanel();
+		GridLayout gl = new GridLayout(1, 2);
+		gl.setHgap(5);
+		mainp.setLayout(gl);
+		ep.setLayout(new BorderLayout());
+		ep.add(new JScrollPane(ta), BorderLayout.CENTER);
+		ep.add(tf, BorderLayout.SOUTH);
+
+		_panel = new JPanel();
+		_contentPane.add(_panel, BorderLayout.NORTH);
+		_panel.setLayout(new GridLayout(2, 0, 0, 0));
+		label = new JLabel();
+		canvas = new BoardView();
+		JPanel wp = new JPanel();
+		_panel.add(wp);
+		wp.setLayout(new BorderLayout());
+		wp.add(label, BorderLayout.SOUTH);
+		wp.add(canvas, BorderLayout.CENTER);
+
+		_logTextArea = new JTextArea();
+		_panel.add(_logTextArea);
+		mainp.add(ep);
+		this.setVisible(true);
+
+		this.setMessage("Ready.");
+		this.setDebugMode(false);
+	}
+
+	public void setMessage(String msg) {
+		label.setText(msg);
+	}
+
+	public void setDebugMode(boolean value) {
+		if (value) {
+			this.setSize(640, 640);
+			_logTextArea.setVisible(true);
+
+		} else {
+			this.setSize(640, 320);
+			_logTextArea.setVisible(false);
+		}
+	}
+}
