@@ -27,7 +27,6 @@ public class TcpChannel extends Channel {
 
 	@Override
 	public byte[] read() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

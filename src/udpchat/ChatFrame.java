@@ -46,6 +46,8 @@ import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
 import javax.swing.JTextPane;
 import javax.swing.Box;
+import java.awt.Component;
+import javax.swing.ListSelectionModel;
 
 public class ChatFrame extends JFrame {
 
@@ -53,7 +55,6 @@ public class ChatFrame extends JFrame {
 	private JPanel contentPane;
 	private JTextArea inputText;
 	JList _messagesList;
-	private MessagesImpl _messages;
 	private App _app;
 	private JPanel _panel;
 	private JCheckBox sendWithSEnterCheckBox;
@@ -62,44 +63,8 @@ public class ChatFrame extends JFrame {
 	private JTextPane logPane;
 	private Box _verticalBox;
 
-	public MessagesImpl getMessages() {
-		return _messages;
-	}
-
-	public class MessagesImpl extends AbstractListModel {
-		private static final long serialVersionUID = 1L;
-		public final static int DEFAULT_HISTORY_SIZE = 100;
-		private int _historySize;
-		private Vector<String> _messages;
-
-		public MessagesImpl(int histsize) {
-			_historySize = histsize;
-			_messages = new Vector<String>(histsize);
-		}
-
-		public MessagesImpl() {
-			this(DEFAULT_HISTORY_SIZE);
-		}
-
-		public void add(String msg) {
-			_messages.insertElementAt(msg, 0);
-			if (_messages.size() > _historySize * 2) {
-				for (int i = _messages.size() - 1; i >= _historySize - 1; i--) {
-					_messages.remove(i);
-				}
-			}
-			this.fireContentsChanged(this, 0, 1);
-		}
-
-		@Override
-		public Object getElementAt(int arg0) {
-			return _messages.get(arg0);
-		}
-
-		@Override
-		public int getSize() {
-			return _messages.size();
-		}
+	public void addMessage(ChatMessage msg){
+		_messagesList.add(new ChatPost(msg));
 	}
 
 	private void send() {
@@ -118,8 +83,7 @@ public class ChatFrame extends JFrame {
 	@SuppressWarnings("serial")
 	public ChatFrame(App app) {
 		_app = app;
-		_messages = new MessagesImpl();
-		setFont(new Font("Monoscaped", Font.PLAIN, 13));
+		//setFont(new Font("Monoscaped", Font.PLAIN, 13));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 638, 454);
 		contentPane = new JPanel();
@@ -146,7 +110,7 @@ public class ChatFrame extends JFrame {
 				}
 			}
 		});
-		inputText.setFont(new Font("Monoscaped", Font.PLAIN, 13));
+		//inputText.setFont(new Font("Monoscaped", Font.PLAIN, 13));
 		inputPanel.add(inputText);
 		inputText.setColumns(10);
 
@@ -157,7 +121,7 @@ public class ChatFrame extends JFrame {
 			}
 		});
 
-		sendButton.setFont(new Font("Meiryo UI", Font.PLAIN, 13));
+		//sendButton.setFont(new Font("Meiryo UI", Font.PLAIN, 13));
 		inputPanel.add(sendButton);
 
 		JPanel bodyPanel = new JPanel();
@@ -165,8 +129,8 @@ public class ChatFrame extends JFrame {
 		bodyPanel.setLayout(new BorderLayout(0, 0));
 
 		_messagesList = new JList();
-		_messagesList.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		_messagesList.setModel(_messages);
+		_messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		//_messagesList.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		bodyPanel.add(_messagesList);
 
 		_panel = new JPanel();
@@ -174,9 +138,8 @@ public class ChatFrame extends JFrame {
 		_panel.setLayout(new BorderLayout(0, 0));
 
 		_panel_1 = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) _panel_1.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEADING);
 		_panel.add(_panel_1, BorderLayout.CENTER);
+		_panel_1.setLayout(new BorderLayout(0, 0));
 
 		logPane = new JTextPane();
 		logPane.setEditable(false);

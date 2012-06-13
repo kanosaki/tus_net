@@ -5,7 +5,6 @@ import control.*;
 public class Smtp extends Protocol {
 	@Override
 	public void dispatch(String line) {
-		// TODO Auto-generated method stub
 
 	}
 

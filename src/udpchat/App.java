@@ -96,8 +96,7 @@ public abstract class App implements MessageArrivedListener, Runnable {
 
 		@Override
 		public void messageArrived(ChatMessage msg) {
-			String message = msg.toString();
-			_frame.getMessages().add(message);
+			_frame.addMessage(msg);
 		}
 
 		@Override
