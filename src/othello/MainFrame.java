@@ -14,7 +14,7 @@ public class MainFrame extends JFrame {
 	private JTextArea ta;
 	private JLabel label;
 	private BoardView canvas;
-	private JPanel _panel;
+	private JPanel _leftWrap;
 	private JTextArea _logTextArea;
 	private JMenuBar _menuBar;
 	private JMenu _menu;
@@ -93,24 +93,23 @@ public class MainFrame extends JFrame {
 		ep.add(new JScrollPane(ta), BorderLayout.CENTER);
 		ep.add(tf, BorderLayout.SOUTH);
 
-		_panel = new JPanel();
-		_contentPane.add(_panel, BorderLayout.NORTH);
-		_panel.setLayout(new GridLayout(2, 0, 0, 0));
+		_leftWrap = new JPanel();
+		_contentPane.add(_leftWrap, BorderLayout.NORTH);
+		_leftWrap.setLayout(new GridLayout(2, 0, 0, 0));
 		label = new JLabel();
 		canvas = new BoardView();
 		JPanel wp = new JPanel();
-		_panel.add(wp);
+		_leftWrap.add(wp);
 		wp.setLayout(new BorderLayout());
 		wp.add(label, BorderLayout.SOUTH);
 		wp.add(canvas, BorderLayout.CENTER);
 
 		_logTextArea = new JTextArea();
-		_panel.add(_logTextArea);
+		_leftWrap.add(_logTextArea);
 		mainp.add(ep);
 		this.setVisible(true);
 
 		this.setMessage("Ready.");
-		this.setDebugMode(false);
 	}
 
 	public void setMessage(String msg) {

@@ -11,6 +11,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JTextField;
 import java.awt.Insets;
+import java.util.logging.LogRecord;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
@@ -21,6 +23,7 @@ public class DebugFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel _wrappingPane;
 	private JTextField _textField;
+	private JTextArea _loggingArea;
 
 	public DebugFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -95,8 +98,12 @@ public class DebugFrame extends JFrame {
 		_wrappingPane.add(_loggingPanel);
 		_loggingPanel.setLayout(new BorderLayout(0, 0));
 
-		JTextArea _loggingArea = new JTextArea();
+		_loggingArea = new JTextArea();
 		_loggingPanel.add(_loggingArea);
 	}
 
+	public void pushLog(LogRecord rec) {
+		_loggingArea.setText(_loggingArea.getText() + "\n" + rec.getMessage());
+	}
+	
 }
