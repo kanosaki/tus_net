@@ -97,8 +97,6 @@ public class MainFrame extends JFrame {
 		wp.add(label, BorderLayout.SOUTH);
 		wp.add(canvas, BorderLayout.CENTER);
 		mainp.add(ep);
-		this.setVisible(true);
-
 		this.setMessage("Ready.");
 	}
 

@@ -23,6 +23,7 @@ public class OthelloClient {
 	private int _remotePort;
 
 	public OthelloClient(String serverHost, int serverPort) {
+		log.info("Client is starting...");
 		_controller = this.createController();
 		_remoteHost = serverHost;
 		_remotePort = serverPort;
@@ -36,7 +37,13 @@ public class OthelloClient {
 	public void start() {
 		Debug.getInstance().showFrame();
 		_mainFrame.setVisible(true);
-		log.info("Client started.");
+		try {
+			_remote.start(_remoteHost, _remotePort);
+			log.info("Connected to " + _remoteHost);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	protected Controller createController() {
@@ -49,15 +56,7 @@ public class OthelloClient {
 	}
 
 	protected RemoteAdapter createAdapter() {
-		try {
-			return new RemoteAdapter(_remoteHost, _remotePort);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.exit(-1);
-		return null;
+		return new RemoteAdapter(_remoteHost, _remotePort);
 	}
 
 	protected MainFrame getFrame() {

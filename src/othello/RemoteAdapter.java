@@ -19,20 +19,15 @@ public class RemoteAdapter {
 	private BufferedReader _input;
 	private BufferedWriter _output;
 	private Socket _sock;
+	private String _remoteHost;
+	private int _remotePort;
 
 	protected Sender _sender;
 	protected Receiver _reciever;
 
-	public RemoteAdapter(String host, int port) throws UnknownHostException, IOException {
+	public RemoteAdapter(String host, int port) {
 		_onMessageReceived = new Signal<Command>();
 		_sendBuffer = new ConcurrentLinkedQueue<Command>();
-		_sock = new Socket(host, port);
-
-		_input = new BufferedReader(new InputStreamReader(_sock.getInputStream()));
-		_output = new BufferedWriter(new OutputStreamWriter(_sock.getOutputStream()));
-
-		_sender = new Sender();
-		_reciever = new Receiver();
 	}
 
 	protected class Sender extends Thread {
@@ -99,14 +94,27 @@ public class RemoteAdapter {
 		}
 	}
 
+	public void start(String host, int port) throws IOException {
+		_remoteHost = host;
+		_remotePort = port;
+		_sock = new Socket(host, port);
+		_input = new BufferedReader(new InputStreamReader(_sock.getInputStream()));
+		_output = new BufferedWriter(new OutputStreamWriter(_sock.getOutputStream()));
+
+		_sender = new Sender();
+		_reciever = new Receiver();
+		log.info("RemoteAdapter started.");
+	}
+
 	public void close() {
-		if(_sender.isAlive())
+		if (_sender.isAlive())
 			_sender.interrupt();
-		if(_reciever.isAlive())
+		if (_reciever.isAlive())
 			_reciever.interrupt();
 	}
 
 	protected void onMessageReceived(Command msg) {
+		log.info("RECEIVED: " + msg);
 		_onMessageReceived.fire(msg);
 	}
 
