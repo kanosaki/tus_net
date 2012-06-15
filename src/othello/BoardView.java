@@ -41,6 +41,10 @@ public class BoardView extends JPanel {
 		_model = model;
 		this.repaint();
 	}
+	
+	public void addOnClickedListender(Listener<Point> listener){
+		_onClicked.addListener(listener);
+	}
 
 	public void paintComponent(Graphics g) {
 		g.setColor(this.getBackground());

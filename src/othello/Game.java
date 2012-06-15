@@ -1,13 +1,11 @@
 package othello;
 
 public class Game {
-	// 0: black, 1: white
-	Player[] _players;
+	Player _player;
 	Board _board;
 	
-	public Game(){
-		_players  = new Player[2];
-		
+	public Game(Player player){
+		_player = player;
 	}
 	
 	public Board getBoard(){
@@ -20,5 +18,21 @@ public class Game {
 	
 	public static enum State {
 		Ready, BlackTurn, WhiteTurn, Finished
+	}
+
+	public void close() {
+		
+	}
+
+	public void start(int myColor) {
+		
+	}
+
+	public void end() {
+		
+	}
+
+	public void turnChange(int turn) {
+		
 	}
 }

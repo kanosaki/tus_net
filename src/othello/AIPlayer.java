@@ -1,5 +1,10 @@
 package othello;
 
-public class AIPlayer extends Player {
+public class AIPlayer implements Player {
+
+	@Override
+	public void playTurn(Board board) {
+		
+	}
 
 }

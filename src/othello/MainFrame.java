@@ -14,8 +14,6 @@ public class MainFrame extends JFrame {
 	private JTextArea ta;
 	private JLabel label;
 	private BoardView canvas;
-	private JPanel _leftWrap;
-	private JTextArea _logTextArea;
 	private JMenuBar _menuBar;
 	private JMenu _menu;
 	private JMenuItem _connectMenuItem;
@@ -59,7 +57,6 @@ public class MainFrame extends JFrame {
 		_checkBoxMenuItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				setDebugMode(_checkBoxMenuItem.isSelected());
 			}
 		});
 
@@ -68,7 +65,7 @@ public class MainFrame extends JFrame {
 		_contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		_contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(_contentPane);
-		this.setSize(640, 640);
+		this.setSize(640, 320);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.exit(0);
@@ -92,20 +89,13 @@ public class MainFrame extends JFrame {
 		ep.setLayout(new BorderLayout());
 		ep.add(new JScrollPane(ta), BorderLayout.CENTER);
 		ep.add(tf, BorderLayout.SOUTH);
-
-		_leftWrap = new JPanel();
-		_contentPane.add(_leftWrap, BorderLayout.NORTH);
-		_leftWrap.setLayout(new GridLayout(2, 0, 0, 0));
 		label = new JLabel();
 		canvas = new BoardView();
 		JPanel wp = new JPanel();
-		_leftWrap.add(wp);
+		_contentPane.add(wp, BorderLayout.NORTH);
 		wp.setLayout(new BorderLayout());
 		wp.add(label, BorderLayout.SOUTH);
 		wp.add(canvas, BorderLayout.CENTER);
-
-		_logTextArea = new JTextArea();
-		_leftWrap.add(_logTextArea);
 		mainp.add(ep);
 		this.setVisible(true);
 
@@ -116,14 +106,7 @@ public class MainFrame extends JFrame {
 		label.setText(msg);
 	}
 
-	public void setDebugMode(boolean value) {
-		if (value) {
-			this.setSize(640, 640);
-			_logTextArea.setVisible(true);
-
-		} else {
-			this.setSize(640, 320);
-			_logTextArea.setVisible(false);
-		}
+	public BoardView getBoardView() {
+		return canvas;
 	}
 }

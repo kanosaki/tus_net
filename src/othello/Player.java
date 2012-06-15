@@ -1,5 +1,5 @@
 package othello;
 
-public class Player {
-
+public interface Player {
+	void playTurn(Board board);
 }
