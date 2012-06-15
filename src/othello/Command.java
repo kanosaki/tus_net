@@ -18,6 +18,8 @@ public abstract class Command {
 			return SAY.restore(line);
 		if (line.startsWith("PUT"))
 			return PUT.restore(line);
+		if (line.startsWith("ERROR"))
+			return PUT_ERROR.restore(line);
 		if (line.startsWith("BOARD"))
 			return BOARD.restore(line);
 		if (line.startsWith("TURN"))
@@ -159,19 +161,14 @@ public abstract class Command {
 		}
 
 		public static Command restore(String line) {
-			Matcher error = PUT_ERROR_PATTERN.matcher(line);
-			if (error.matches()) {
-				return new PUT_ERROR(Integer.parseInt(error.group(1)));
+			Matcher put = PUT_PATTERN.matcher(line);
+			if (put.matches()) {
+				int x = Integer.parseInt(put.group(1));
+				int y = Integer.parseInt(put.group(2));
+				return new PUT(x, y);
 			} else {
-				Matcher put = PUT_PATTERN.matcher(line);
-				if (put.matches()) {
-					int x = Integer.parseInt(put.group(1));
-					int y = Integer.parseInt(put.group(2));
-					return new PUT(x, y);
-				} else {
-					log.warning(String.format("Invalid PUT command received. [%s]", line));
-					return Command.VOID;
-				}
+				log.warning(String.format("Invalid PUT command received. [%s]", line));
+				return Command.VOID;
 			}
 		}
 
@@ -182,7 +179,7 @@ public abstract class Command {
 
 		@Override
 		public String encode() {
-			return String.format("PUT %d %d", this.getX(), this.getY());
+			return String.format("PUT %s %s", this.getX(), this.getY());
 		}
 
 		@Override
@@ -192,10 +189,19 @@ public abstract class Command {
 
 	}
 
-	public static class PUT_ERROR extends Command { // PUT ERROR seems to be
-		// not subclass of PUT.
+	public static class PUT_ERROR extends Command {
 		public PUT_ERROR(int code) {
 			_code = code;
+		}
+
+		public static Command restore(String line) {
+			try {
+				int code = Integer.parseInt(line.substring(5).trim());
+				return new PUT_ERROR(code);
+			} catch (NumberFormatException e) {
+				log.warning(String.format("Invalid ERROR command received [%s]", line));
+				return Command.VOID;
+			}
 		}
 
 		private int _code;
@@ -205,12 +211,12 @@ public abstract class Command {
 
 		@Override
 		public String toString() {
-			return String.format("<PUT %s>", _errorDetail[_code]);
+			return String.format("<%s>", _errorDetail[_code]);
 		}
 
 		@Override
 		public String encode() {
-			return String.format("PUT ERROR %d", this.getCode());
+			return String.format("ERROR %d", this.getCode());
 		}
 
 		public int getCode() {
@@ -219,8 +225,7 @@ public abstract class Command {
 
 		@Override
 		public void received(Controller ctrl) {
-			ctrl.error();
-			throw new ServerError(this);
+			ctrl.error(getCode());
 		}
 	}
 
@@ -296,6 +301,11 @@ public abstract class Command {
 		public void received(Controller ctrl) {
 			ctrl.updateBoard(_board);
 		}
+
+		@Override
+		public String toString() {
+			return "<BOARD>";
+		}
 	}
 
 	// TURN <playercolor>
@@ -329,6 +339,11 @@ public abstract class Command {
 		public void received(Controller ctrl) {
 			ctrl.turnChange(this.getCode());
 		}
+
+		@Override
+		public String toString() {
+			return String.format("<TURN %d>", this.getCode());
+		}
 	}
 
 	// END
@@ -347,6 +362,11 @@ public abstract class Command {
 		public void received(Controller ctrl) {
 			ctrl.endGame("");
 		}
+
+		@Override
+		public String toString() {
+			return String.format("<END>");
+		}
 	}
 
 	// START <playercolor>
@@ -354,7 +374,7 @@ public abstract class Command {
 		int _code;
 
 		public START(int code) {
-
+			_code = code;
 		}
 
 		public int getCode() {
@@ -363,7 +383,7 @@ public abstract class Command {
 
 		public static Command restore(String line) {
 			try {
-				int code = Integer.parseInt(line.substring(4).trim());
+				int code = Integer.parseInt(line.substring(5).trim());
 				return new START(code);
 			} catch (NumberFormatException e) {
 				log.warning(String.format("Invalid START command received [%s]", line));
@@ -379,6 +399,11 @@ public abstract class Command {
 		@Override
 		public void received(Controller ctrl) {
 			ctrl.startGame(this.getCode());
+		}
+
+		@Override
+		public String toString() {
+			return String.format("<START %d>", this.getCode());
 		}
 	}
 
@@ -397,6 +422,11 @@ public abstract class Command {
 		public void received(Controller ctrl) {
 			ctrl.close();
 		}
+
+		@Override
+		public String toString() {
+			return "<CLOSE>";
+		}
 	}
 
 	public static class VoidCommand extends Command {
@@ -409,6 +439,11 @@ public abstract class Command {
 		@Override
 		public void received(Controller ctrl) {
 			log.warning("VoidMessage.received has been called.");
+		}
+
+		@Override
+		public String toString() {
+			return "<VOID>";
 		}
 
 	}

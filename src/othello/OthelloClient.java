@@ -24,22 +24,27 @@ public class OthelloClient {
 
 	public OthelloClient(String serverHost, int serverPort) {
 		log.info("Client is starting...");
-		_controller = this.createController();
-		_remoteHost = serverHost;
-		_remotePort = serverPort;
+		setController(this.createController());
+		setRemoteHost(serverHost);
+		setRemotePort(serverPort);
 		_mainFrame = new MainFrame();
-		_game = this.createUserGame();
-		_controller.setGame(_game);
+		getController().setMainFrame(_mainFrame);
+		_game = this.createGame();
+		getController().setGame(_game);
 		_remote = this.createAdapter();
-		_controller.setRemoteAdapter(_remote);
+		getController().setRemoteAdapter(_remote);
 	}
 
 	public void start() {
 		Debug.getInstance().showFrame();
 		_mainFrame.setVisible(true);
+		this.connect(getRemoteHost(), getRemotePort());
+	}
+
+	public void connect(String host, int port) {
 		try {
-			_remote.start(_remoteHost, _remotePort);
-			log.info("Connected to " + _remoteHost);
+			_remote.start(host, port);
+			log.info("Connected to " + getRemoteHost());
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -50,13 +55,23 @@ public class OthelloClient {
 		return new Controller();
 	}
 
-	protected Game createUserGame() {
-		Player player = new UserPlayer(this.getController(), this.getFrame().getBoardView());
-		return new Game(player);
+	protected Player createPlayer() {
+		return new UserPlayer(this.getController(), this.getFrame().getBoardView());
+	}
+
+	protected Game createGame() {
+		return new Game(this.createPlayer());
 	}
 
 	protected RemoteAdapter createAdapter() {
-		return new RemoteAdapter(_remoteHost, _remotePort);
+		RemoteAdapter adapter = new RemoteAdapter(getRemoteHost(), getRemotePort());
+		adapter.addMessageListener(new Listener<Command>() {
+			@Override
+			public void next(Command val) {
+				val.received(getController());
+			}
+		});
+		return adapter;
 	}
 
 	protected MainFrame getFrame() {
@@ -73,8 +88,49 @@ public class OthelloClient {
 			OthelloClient client = args.length == 2 ? new OthelloClient(args[1], Integer.parseInt(args[0]))
 					: new OthelloClient(DEFAULT_HOST, DEFAULT_PORT);
 			client.start();
+
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					log.info("Starting AI Client...");
+					AI ai = new AI(DEFAULT_HOST, DEFAULT_PORT);
+					ai.start();
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	protected String getRemoteHost() {
+		return _remoteHost;
+	}
+
+	protected void setRemoteHost(String remoteHost) {
+		_remoteHost = remoteHost;
+	}
+
+	protected int getRemotePort() {
+		return _remotePort;
+	}
+
+	protected void setRemotePort(int remotePort) {
+		_remotePort = remotePort;
+	}
+
+	private void setController(Controller controller) {
+		_controller = controller;
+	}
+
+	public static class AI extends OthelloClient {
+		public AI(String serverHost, int serverPort) {
+			super(serverHost, serverPort);
+			this.getController().showMessage("AI Mode");
+		}
+
+		@Override
+		protected Player createPlayer() {
+			return AIPlayer.create(getController(), AIPlayer.Strategy.Simple);
 		}
 	}
 }

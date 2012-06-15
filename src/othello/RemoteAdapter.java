@@ -73,10 +73,12 @@ public class RemoteAdapter {
 				Command msg = Command.decode(line);
 				if (msg == null) {
 					log.warning("Message decoding failed. Decoder returned null.");
+					log.warning("Data: " + line);
 					return Command.VOID;
 				}
 				if (msg == Command.VOID) {
 					log.warning("Message decoding failed. Decoder returned VOID message");
+					log.warning("Data: " + line);
 				}
 				return msg;
 			} catch (Exception e) {
@@ -103,6 +105,7 @@ public class RemoteAdapter {
 
 		_sender = new Sender();
 		_reciever = new Receiver();
+		_reciever.start();
 		log.info("RemoteAdapter started.");
 	}
 

@@ -27,6 +27,43 @@ public class Board {
 			return CellState.Void;
 	}
 
+	public boolean canPut(int x, int y, CellState color) {
+		if (color == CellState.Void)
+			throw new AssertionError();
+		if (hasStone(x, y))
+			return false;
+		CellState hostileColor = color.flip();
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dy = -1; dy <= 1; dy++) {
+				if (dx == 0 && dy == 0)
+					continue;
+				int seekX = x + dx;
+				int seekY = y + dy;
+				if (isInBound(seekX, seekY) && _board[seekX][seekY] == hostileColor) {
+					while (true) {
+						seekX += dx;
+						seekY += dy;
+						if (isInBound(seekX, seekY)) {
+							if(_board[seekX][seekY] == hostileColor)
+								continue;
+							else if (_board[seekX][seekY] == color) {
+								return true;
+							}
+						} else {
+							break;
+						}
+					}
+				}
+
+			}
+		}
+		return false;
+	}
+
+	private boolean isInBound(int x, int y) {
+		return x >= 0 && x < Board.SIZE && y >= 0 && y < Board.SIZE;
+	}
+
 	/**
 	 * Same as set, but value will be checked.
 	 */

@@ -3,7 +3,9 @@ package othello;
 import java.awt.Point;
 import java.util.logging.Logger;
 
-public class UserPlayer implements Player {
+import othello.Board.CellState;
+
+public class UserPlayer extends Player {
 	private static final Logger log = Logger.getLogger("User Player");
 	Controller _controller;
 	boolean _isMyTurn = false;
@@ -18,20 +20,30 @@ public class UserPlayer implements Player {
 		});
 	}
 
-	public boolean isMyTurn(){
+	public boolean isMyTurn() {
 		return _isMyTurn;
 	}
-	
+
 	@Override
-	public void playTurn(Board board) {
+	public void playTurn(Board board, Game game) {
 		_isMyTurn = true;
 	}
 
+	private boolean checkPutting(int x, int y) {
+		Board board = _controller.getGame().getBoard();
+		return board.canPut(x, y, getColor());
+	}
+
 	private void putStone(int x, int y) {
-		if (_isMyTurn)
-			_controller.putStone(x, y);
-		else
-			log.warning("NOT YOUR TURN!!");
+		if (_isMyTurn) {
+			if (checkPutting(x, y)) {
+				_controller.putStone(x, y);
+				_isMyTurn = false;
+			} else {
+				_controller.showMessage("YOU CAANNOT PUT THERE.");
+			}
+		} else
+			_controller.showMessage("NOT YOUR TURN!!");
 	}
 
 }

@@ -12,6 +12,8 @@ public class BoardView extends JPanel {
 	private final static int PADDING_X = 20;
 	private final static int PADDING_Y = 10;
 	private final static int CELL_SIZE = 30;
+	private final Rectangle BOARD_AREA = new Rectangle(PADDING_X, PADDING_Y, CELL_SIZE * Board.SIZE, CELL_SIZE
+			* Board.SIZE);
 
 	public BoardView() {
 		this(new Board());
@@ -24,14 +26,24 @@ public class BoardView extends JPanel {
 		this.setGridColor(Color.BLACK);
 		this.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				_onClicked.fire(toLogicalPoint(e.getPoint()));
+				Point p = toLogicalPoint(e.getPoint());
+				if (BOARD_AREA.contains(e.getPoint()) && isNotNearGrid(e.getPoint()))
+					_onClicked.fire(p);
 			}
 		});
 	}
 
+	private static boolean isNotNearGrid(Point p) {
+		final int margin = 4;
+		int x = p.x - PADDING_X;
+		int y = p.y - PADDING_Y;
+		return ((x % CELL_SIZE > margin) && ((x % CELL_SIZE) < (CELL_SIZE - margin)))
+				|| ((y % CELL_SIZE > margin) && ((y % CELL_SIZE) < (CELL_SIZE - margin)));
+	}
+
 	protected Point toLogicalPoint(Point p) {
-		int x = (int) ((p.getX() - PADDING_X) / Board.SIZE);
-		int y = (int) ((p.getY() - PADDING_Y) / Board.SIZE);
+		int x = (p.x - PADDING_X) / CELL_SIZE;
+		int y = (p.y - PADDING_Y) / CELL_SIZE;
 		return new Point(x, y);
 	}
 
@@ -41,8 +53,8 @@ public class BoardView extends JPanel {
 		_model = model;
 		this.repaint();
 	}
-	
-	public void addOnClickedListender(Listener<Point> listener){
+
+	public void addOnClickedListender(Listener<Point> listener) {
 		_onClicked.addListener(listener);
 	}
 

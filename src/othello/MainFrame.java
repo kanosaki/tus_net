@@ -65,7 +65,7 @@ public class MainFrame extends JFrame {
 		_contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		_contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(_contentPane);
-		this.setSize(640, 320);
+		this.setSize(640, 360);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.exit(0);
@@ -100,8 +100,16 @@ public class MainFrame extends JFrame {
 		this.setMessage("Ready.");
 	}
 
+	public void pushMessage(String msg){
+		ta.setText(ta.getText() + "\n" + msg);
+	}
+	
 	public void setMessage(String msg) {
 		label.setText(msg);
+	}
+
+	public void setChatMessage(String user, String msg) {
+		this.pushMessage(String.format("<%s> : %s", user, msg));
 	}
 
 	public BoardView getBoardView() {
