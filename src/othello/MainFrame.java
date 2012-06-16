@@ -23,8 +23,10 @@ public class MainFrame extends JFrame {
 	private JMenu _exportChatLogMenuItem;
 	private JCheckBoxMenuItem _autoPilotCheckBoxMenuItem;
 	private JSeparator _separator;
+	private Controller _controller;
 
-	public MainFrame() {
+	public MainFrame(Controller controller) {
+		_controller = controller;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 
@@ -74,6 +76,7 @@ public class MainFrame extends JFrame {
 		tf = new JTextField(40);
 		tf.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				_controller.say(tf.getText());
 				tf.setText("");
 			}
 		});

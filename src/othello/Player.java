@@ -2,7 +2,7 @@ package othello;
 
 import othello.Board.CellState;
 
-public abstract class Player {
+public abstract class Player extends Model {
 	private CellState _myColor;
 	public abstract void playTurn(Board board, Game game);
 	public CellState getColor(){

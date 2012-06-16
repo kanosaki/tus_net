@@ -10,11 +10,10 @@ import java.util.logging.Logger;
  * 
  * @author \@kanosaki
  */
-public class OthelloClient {
+public class OthelloClient extends Model{
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 9876;
 
-	private static final Logger log = Logger.getLogger("Client");
 	private MainFrame _mainFrame;
 	private Controller _controller;
 	private Game _game;
@@ -23,11 +22,11 @@ public class OthelloClient {
 	private int _remotePort;
 
 	public OthelloClient(String serverHost, int serverPort) {
-		log.info("Client is starting...");
+		getLog().info("Client is starting...");
 		setController(this.createController());
 		setRemoteHost(serverHost);
 		setRemotePort(serverPort);
-		_mainFrame = new MainFrame();
+		_mainFrame = new MainFrame(getController());
 		getController().setMainFrame(_mainFrame);
 		_game = this.createGame();
 		getController().setGame(_game);
@@ -44,7 +43,7 @@ public class OthelloClient {
 	public void connect(String host, int port) {
 		try {
 			_remote.start(host, port);
-			log.info("Connected to " + getRemoteHost());
+			getLog().info("Connected to " + getRemoteHost());
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -92,7 +91,7 @@ public class OthelloClient {
 			EventQueue.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					log.info("Starting AI Client...");
+					getClassLogger().info("Starting AI Client...");
 					AI ai = new AI(DEFAULT_HOST, DEFAULT_PORT);
 					ai.start();
 				}

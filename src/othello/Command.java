@@ -6,8 +6,8 @@ import java.util.regex.*;
 
 import othello.Board.CellState;
 
-public abstract class Command {
-	protected static final Logger log = Logger.getLogger("Message");
+public abstract class Command extends Model {
+	
 
 	public static Command decode(String line) {
 		if (line == null)
@@ -72,7 +72,7 @@ public abstract class Command {
 	// SAY <message>
 	// SAY <username>:<message>
 	public static class SAY extends Command {
-		static final Pattern SAY_RECV_PATTERN = Pattern.compile("SAY (.+):(.*)");
+		static final Pattern SAY_RECV_PATTERN = Pattern.compile("SAY <(.+?)>:(.*)");
 
 		public SAY(String message) {
 			_message = message;
@@ -92,7 +92,7 @@ public abstract class Command {
 		public static Command restore(String line) {
 			Matcher recv = SAY_RECV_PATTERN.matcher(line);
 			if (recv.matches()) {
-				return new SAY_RECV(recv.group(0), recv.group(1));
+				return new SAY_RECV(recv.group(1), recv.group(2));
 			} else {
 				return new SAY(line.substring(3).trim());
 			}
@@ -117,7 +117,7 @@ public abstract class Command {
 
 			@Override
 			public String encode() {
-				return String.format("SAY %s:%s", this.getUser(), this.getMessage());
+				return String.format("SAY <%s>:%s", this.getUser(), this.getMessage());
 			}
 
 			@Override
@@ -133,7 +133,7 @@ public abstract class Command {
 
 		@Override
 		public void received(Controller ctrl) {
-			log.warning("Unexpected SAY(send) command received. " + this);
+			getLog().warning("Unexpected SAY(send) command received. " + this);
 		}
 
 	}
@@ -167,7 +167,7 @@ public abstract class Command {
 				int y = Integer.parseInt(put.group(2));
 				return new PUT(x, y);
 			} else {
-				log.warning(String.format("Invalid PUT command received. [%s]", line));
+				getClassLogger().warning(String.format("Invalid PUT command received. [%s]", line));
 				return Command.VOID;
 			}
 		}
@@ -175,6 +175,7 @@ public abstract class Command {
 		@Override
 		public String toString() {
 			return String.format("<PUT (%d, %d)>", getX(), getY());
+			
 		}
 
 		@Override
@@ -184,7 +185,7 @@ public abstract class Command {
 
 		@Override
 		public void received(Controller ctrl) {
-			log.warning("Unexpected PUT command received : " + this);
+			getLog().warning("Unexpected PUT command received : " + this);
 		}
 
 	}
@@ -199,7 +200,7 @@ public abstract class Command {
 				int code = Integer.parseInt(line.substring(5).trim());
 				return new PUT_ERROR(code);
 			} catch (NumberFormatException e) {
-				log.warning(String.format("Invalid ERROR command received [%s]", line));
+				getClassLogger().warning(String.format("Invalid ERROR command received [%s]", line));
 				return Command.VOID;
 			}
 		}
@@ -242,7 +243,7 @@ public abstract class Command {
 			StringTokenizer tokenizer = new StringTokenizer(boardData, " ");
 			int tokenCount = 0;
 			if ((tokenCount = tokenizer.countTokens()) != Board.CELLS) {
-				log.warning(String.format("Invalid BOARD data, content length expecded %d but received %d",
+				getClassLogger().warning(String.format("Invalid BOARD data, content length expecded %d but received %d",
 						Board.CELLS, tokenCount));
 				return Command.VOID;
 			}
@@ -266,7 +267,7 @@ public abstract class Command {
 			case -1:
 				return CellState.White;
 			default:
-				log.warning("Invalid stone color: " + cellVal);
+				getClassLogger().warning("Invalid stone color: " + cellVal);
 				return CellState.Void;
 			}
 		}
@@ -325,7 +326,7 @@ public abstract class Command {
 				int code = Integer.parseInt(line.substring(4).trim());
 				return new TURN(code);
 			} catch (NumberFormatException e) {
-				log.warning(String.format("Invalid TURN command received [%s]", line));
+				getClassLogger().warning(String.format("Invalid TURN command received [%s]", line));
 				return Command.VOID;
 			}
 		}
@@ -386,7 +387,7 @@ public abstract class Command {
 				int code = Integer.parseInt(line.substring(5).trim());
 				return new START(code);
 			} catch (NumberFormatException e) {
-				log.warning(String.format("Invalid START command received [%s]", line));
+				getClassLogger().warning(String.format("Invalid START command received [%s]", line));
 				return Command.VOID;
 			}
 		}
@@ -438,7 +439,7 @@ public abstract class Command {
 
 		@Override
 		public void received(Controller ctrl) {
-			log.warning("VoidMessage.received has been called.");
+			getLog().warning("VoidMessage.received has been called.");
 		}
 
 		@Override

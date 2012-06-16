@@ -1,8 +1,9 @@
 package othello;
 
-public class Game {
+public class Game extends Model {
 	int _myCode;
 	Player _player;
+	String _nickName;
 	Board _board;
 
 	public Game(Player player) {
@@ -33,8 +34,8 @@ public class Game {
 	public void end() {
 
 	}
-	
-	public boolean isMyTurn(int code){
+
+	public boolean isMyTurn(int code) {
 		return _myCode == code;
 	}
 

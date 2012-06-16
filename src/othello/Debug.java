@@ -1,11 +1,26 @@
 package othello;
 
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class Debug {
-	private static final Logger log = Logger.getLogger("DebugConsole");
+public class Debug extends Model {
+	private static final String DEFAULT_LOGGER_NAME = "DebugConsole";
+	private static Logger _classLogger = Logger.getLogger(DEFAULT_LOGGER_NAME);
+
+	private Logger _instanceLogger;
+	protected static Logger getClassLogger(){
+		return _classLogger;
+	}
+	protected Logger getLog(){
+		if(_instanceLogger == null)
+			return _classLogger;
+		else
+			return _instanceLogger;
+	}
+	public void setLoggerName(String name){
+		_instanceLogger = Logger.getLogger(DEFAULT_LOGGER_NAME + "#" + name); 
+	}
+	
 	private static Debug _instance;
 	private DebugFrame _frame;
 	private LogHandler _logHandler;
@@ -14,7 +29,7 @@ public class Debug {
 		if (withFrame)
 			this.initFrame();
 		this.initLogger();
-		log.finest("Debug Console Ready.");
+		getLog().finest("Debug Console Ready.");
 	}
 	
 	public static Debug getInstance() {
@@ -51,6 +66,8 @@ public class Debug {
 		this.initFrame();
 		return _frame;
 	}
+
+	
 
 	class LogHandler extends java.util.logging.Handler {
 

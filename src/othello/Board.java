@@ -2,7 +2,7 @@ package othello;
 
 import java.awt.Color;
 
-public class Board {
+public class Board extends Model {
 	public static final int SIZE = 8;
 	public static final int CELLS = SIZE * SIZE;
 	private CellState _board[][];
@@ -48,6 +48,8 @@ public class Board {
 								continue;
 							else if (_board[seekX][seekY] == color) {
 								return true;
+							} else {
+								break;
 							}
 						} else {
 							break;

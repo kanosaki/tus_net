@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import othello.Board.CellState;
 
 public class UserPlayer extends Player {
-	private static final Logger log = Logger.getLogger("User Player");
 	Controller _controller;
 	boolean _isMyTurn = false;
 

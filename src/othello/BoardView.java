@@ -9,9 +9,11 @@ public class BoardView extends JPanel {
 	private Board _model;
 	private Signal<Point> _onClicked;
 	private Color _gridColor;
+	private Color _boardBaseColor;
 	private final static int PADDING_X = 20;
 	private final static int PADDING_Y = 10;
 	private final static int CELL_SIZE = 30;
+	private final static int CELL_PADDING = 2;
 	private final Rectangle BOARD_AREA = new Rectangle(PADDING_X, PADDING_Y, CELL_SIZE * Board.SIZE, CELL_SIZE
 			* Board.SIZE);
 
@@ -20,10 +22,10 @@ public class BoardView extends JPanel {
 	}
 
 	public BoardView(Board model) {
-		this.updateModel(model);
 		_onClicked = new Signal<Point>();
-		this.setBackground(new Color(0, 180, 0));
+		setBoardBaseColor(new Color(0, 180, 0));
 		this.setGridColor(Color.BLACK);
+		this.updateModel(model);
 		this.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				Point p = toLogicalPoint(e.getPoint());
@@ -51,7 +53,7 @@ public class BoardView extends JPanel {
 		if (model == null)
 			throw new IllegalArgumentException("NullArgumentException");
 		_model = model;
-		this.repaint();
+		repaint();
 	}
 
 	public void addOnClickedListender(Listener<Point> listener) {
@@ -59,7 +61,9 @@ public class BoardView extends JPanel {
 	}
 
 	public void paintComponent(Graphics g) {
-		g.setColor(this.getBackground());
+		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		super.paintComponent(g);
+		g.setColor(getBoardBaseColor());
 		g.fillRect(PADDING_X, PADDING_Y, CELL_SIZE * Board.SIZE, CELL_SIZE * Board.SIZE);
 
 		g.setColor(this.getGridColor());
@@ -73,7 +77,8 @@ public class BoardView extends JPanel {
 			for (int j = 0; j < Board.SIZE; j++) {
 				if (_model.hasStone(i, j)) {
 					g.setColor(_model.get(i, j).getColor());
-					g.fillOval(PADDING_X + CELL_SIZE * i, PADDING_Y + CELL_SIZE * j, CELL_SIZE, CELL_SIZE);
+					g.fillOval(PADDING_X + CELL_SIZE * i + CELL_PADDING + 1, PADDING_Y + CELL_SIZE * j + CELL_PADDING + 1,
+							CELL_SIZE - CELL_PADDING * 2, CELL_SIZE - CELL_PADDING * 2);
 				}
 			}
 		}
@@ -85,6 +90,14 @@ public class BoardView extends JPanel {
 
 	public void setGridColor(Color gridColor) {
 		_gridColor = gridColor;
+	}
+
+	private Color getBoardBaseColor() {
+		return _boardBaseColor;
+	}
+
+	private void setBoardBaseColor(Color boardBaseColor) {
+		_boardBaseColor = boardBaseColor;
 	}
 
 }

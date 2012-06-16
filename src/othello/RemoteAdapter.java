@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Logger;
 
-public class RemoteAdapter {
-	private static Logger log = Logger.getLogger("RemoteAdapter");
-
+public class RemoteAdapter extends Model {
 	private Signal<Command> _onMessageReceived;
-	private Queue<Command> _sendBuffer;
+
 	private BufferedReader _input;
 	private BufferedWriter _output;
 	private Socket _sock;
@@ -27,25 +25,42 @@ public class RemoteAdapter {
 
 	public RemoteAdapter(String host, int port) {
 		_onMessageReceived = new Signal<Command>();
-		_sendBuffer = new ConcurrentLinkedQueue<Command>();
+
 	}
 
 	protected class Sender extends Thread {
+		private Queue<Command> _sendBuffer;
+
+		protected Sender() {
+			_sendBuffer = new ConcurrentLinkedQueue<Command>();
+		}
+
+		public synchronized void push(Command com) {
+			_sendBuffer.add(com);
+			notifyAll();
+		}
+
 		@Override
-		public void run() {
+		public synchronized void run() {
 			try {
 				Command next;
-				while ((next = _sendBuffer.poll()) != null) {
-					if (this.isInterrupted())
-						return;
-					String line = next.encode();
-					_output.write(line + "\n");
-					_output.flush();
+				while (true) {
+					wait();
+					while ((next = _sendBuffer.poll()) != null) {
+						if (this.isInterrupted())
+							return;
+						String line = next.encode();
+						_output.write(line + "\n");
+						_output.flush();
+					}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-				log.warning(e.getMessage());
+				getLog().warning(e.getMessage());
 				// TODO: write error handling
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				getLog().warning(e.getMessage());
 			}
 		}
 	}
@@ -63,7 +78,7 @@ public class RemoteAdapter {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-				log.warning(e.getMessage());
+				getLog().warning(e.getMessage());
 				// TODO: write error handling
 			}
 		}
@@ -72,28 +87,24 @@ public class RemoteAdapter {
 			try {
 				Command msg = Command.decode(line);
 				if (msg == null) {
-					log.warning("Message decoding failed. Decoder returned null.");
-					log.warning("Data: " + line);
+					getLog().warning("Message decoding failed. Decoder returned null.");
+					getLog().warning("Data: " + line);
 					return Command.VOID;
 				}
 				if (msg == Command.VOID) {
-					log.warning("Message decoding failed. Decoder returned VOID message");
-					log.warning("Data: " + line);
+					getLog().warning("Message decoding failed. Decoder returned VOID message");
+					getLog().warning("Data: " + line);
 				}
 				return msg;
 			} catch (Exception e) {
-				log.warning("Message decoding failed. " + e.getMessage());
+				getLog().warning("Message decoding failed. " + e.getMessage());
 			}
 			return Command.VOID;
 		}
 	}
 
-	public void send(Command msg) {
-		_sendBuffer.add(msg);
-		if (!_sender.isAlive()) {
-			_sender = new Sender();
-			_sender.start();
-		}
+	public void send(Command com) {
+		_sender.push(com);
 	}
 
 	public void start(String host, int port) throws IOException {
@@ -104,9 +115,10 @@ public class RemoteAdapter {
 		_output = new BufferedWriter(new OutputStreamWriter(_sock.getOutputStream()));
 
 		_sender = new Sender();
+		_sender.start();
 		_reciever = new Receiver();
 		_reciever.start();
-		log.info("RemoteAdapter started.");
+		getLog().info("RemoteAdapter started.");
 	}
 
 	public void close() {
@@ -117,11 +129,12 @@ public class RemoteAdapter {
 	}
 
 	protected void onMessageReceived(Command msg) {
-		log.info("RECEIVED: " + msg);
+		getLog().info("RECEIVED: " + msg);
 		_onMessageReceived.fire(msg);
 	}
 
 	public void addMessageListener(Listener<Command> listener) {
 		_onMessageReceived.addListener(listener);
 	}
+
 }
