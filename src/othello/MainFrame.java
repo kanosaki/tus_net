@@ -37,6 +37,14 @@ public class MainFrame extends JFrame {
 		_menuBar.add(_menu);
 
 		_connectMenuItem = new JMenuItem("Connect...");
+		_connectMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		_menu.add(_connectMenuItem);
 
 		_separator = new JSeparator();
@@ -104,7 +112,7 @@ public class MainFrame extends JFrame {
 	}
 
 	public void pushMessage(String msg){
-		ta.setText(ta.getText() + "\n" + msg);
+		ta.append(msg + "\n");
 	}
 	
 	public void setMessage(String msg) {

@@ -63,7 +63,7 @@ public class OthelloClient extends Model{
 	}
 
 	protected RemoteAdapter createAdapter() {
-		RemoteAdapter adapter = new RemoteAdapter(getRemoteHost(), getRemotePort());
+		RemoteAdapter adapter = new RemoteAdapter();
 		adapter.addMessageListener(new Listener<Command>() {
 			@Override
 			public void next(Command val) {

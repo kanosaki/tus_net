@@ -8,8 +8,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CyclicBarrier;
-import java.util.logging.Logger;
 
 public class RemoteAdapter extends Model {
 	private Signal<Command> _onMessageReceived;
@@ -19,13 +17,17 @@ public class RemoteAdapter extends Model {
 	private Socket _sock;
 	private String _remoteHost;
 	private int _remotePort;
+	private int _ID;
 
 	protected Sender _sender;
 	protected Receiver _reciever;
 
-	public RemoteAdapter(String host, int port) {
+	public RemoteAdapter() {
 		_onMessageReceived = new Signal<Command>();
-
+	}
+	
+	public RemoteAdapter(int id) {
+		_ID = id;
 	}
 
 	protected class Sender extends Thread {
@@ -85,7 +87,7 @@ public class RemoteAdapter extends Model {
 
 		protected Command decodeMessage(String line) {
 			try {
-				Command msg = Command.decode(line);
+				Command msg = Command.decode(line, RemoteAdapter.this);
 				if (msg == null) {
 					getLog().warning("Message decoding failed. Decoder returned null.");
 					getLog().warning("Data: " + line);
@@ -107,10 +109,8 @@ public class RemoteAdapter extends Model {
 		_sender.push(com);
 	}
 
-	public void start(String host, int port) throws IOException {
-		_remoteHost = host;
-		_remotePort = port;
-		_sock = new Socket(host, port);
+	public void start(Socket sock) throws IOException {
+		_sock = sock;
 		_input = new BufferedReader(new InputStreamReader(_sock.getInputStream()));
 		_output = new BufferedWriter(new OutputStreamWriter(_sock.getOutputStream()));
 
@@ -119,6 +119,12 @@ public class RemoteAdapter extends Model {
 		_reciever = new Receiver();
 		_reciever.start();
 		getLog().info("RemoteAdapter started.");
+	}
+	
+	public void start(String host, int port) throws IOException {
+		setRemoteHost(host);
+		setRemotePort(port);
+		start(new Socket(host, port));
 	}
 
 	public void close() {
@@ -135,6 +141,30 @@ public class RemoteAdapter extends Model {
 
 	public void addMessageListener(Listener<Command> listener) {
 		_onMessageReceived.addListener(listener);
+	}
+
+	public String getRemoteHost() {
+		return _remoteHost;
+	}
+
+	public void setRemoteHost(String remoteHost) {
+		_remoteHost = remoteHost;
+	}
+
+	public int getRemotePort() {
+		return _remotePort;
+	}
+
+	public void setRemotePort(int remotePort) {
+		_remotePort = remotePort;
+	}
+
+	public int getID() {
+		return _ID;
+	}
+
+	public void setID(int iD) {
+		_ID = iD;
 	}
 
 }

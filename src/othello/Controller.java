@@ -15,8 +15,8 @@ public class Controller {
 	public void setRemoteAdapter(RemoteAdapter adapter) {
 		_remote = adapter;
 	}
-	
-	public void setMainFrame(MainFrame frame){
+
+	public void setMainFrame(MainFrame frame) {
 		_mainFrame = frame;
 	}
 
@@ -35,15 +35,16 @@ public class Controller {
 	}
 
 	public void endGame(String result) {
+		pushMessage(result);
 		getGame().end();
 	}
 
 	public void turnChange(int turn) {
 		getGame().turnChange(turn);
-		if(getGame().isMyTurn(turn))
-			_mainFrame.setMessage("YOUR TURN!");
+		if (getGame().isMyTurn(turn))
+			showMessage("YOUR TURN!");
 		else
-			_mainFrame.setMessage("Hostile's turn");
+			showMessage("Hostile's turn");
 	}
 
 	public void error(int errorCode) {
@@ -54,26 +55,47 @@ public class Controller {
 		_mainFrame.setChatMessage(user, message);
 	}
 
+	public boolean isServer() {
+		return false;
+	}
+
 	public void say(String msg) {
-		Command cmd = new Command.SAY(msg);
+		Command cmd = new Command.SAY(msg, _remote);
 		_remote.send(cmd);
 	}
 
 	public void showMessage(String msg) {
 		_mainFrame.setMessage(msg);
 	}
-	
-	public void pushMessage(String msg){
+
+	public void pushMessage(String msg) {
 		_mainFrame.pushMessage(msg);
 	}
 
 	public void putStone(int x, int y) {
-		Command cmd = new Command.PUT(x, y);
+		Command cmd = new Command.PUT(x, y, _remote);
 		_remote.send(cmd);
 	}
 
 	Game getGame() {
 		return _game;
+	}
+
+	
+	
+	public void said(RemoteAdapter sender, String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setNickName(RemoteAdapter sender, String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void putBy(RemoteAdapter sender, int x, int y) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

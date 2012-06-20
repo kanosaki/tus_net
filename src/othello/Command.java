@@ -7,30 +7,29 @@ import java.util.regex.*;
 import othello.Board.CellState;
 
 public abstract class Command extends Model {
-	
 
-	public static Command decode(String line) {
+	public static Command decode(String line, RemoteAdapter sender) throws DecodeError {
 		if (line == null)
-			return null;
-		if (line.startsWith("NICK"))
-			return NICK.restore(line);
-		if (line.startsWith("SAY"))
-			return SAY.restore(line);
-		if (line.startsWith("PUT"))
-			return PUT.restore(line);
-		if (line.startsWith("ERROR"))
-			return PUT_ERROR.restore(line);
+			throw new DecodeError("Null argument");
 		if (line.startsWith("BOARD"))
 			return BOARD.restore(line);
 		if (line.startsWith("TURN"))
 			return TURN.restore(line);
+		if (line.startsWith("SAY"))
+			return SAY.restore(sender, line);
+		if (line.startsWith("PUT"))
+			return PUT.restore(sender, line);
 		if (line.startsWith("END"))
 			return END.restore(line);
 		if (line.startsWith("START"))
 			return START.restore(line);
 		if (line.startsWith("CLOSE"))
 			return CLOSE.restore(line);
-		return null;
+		if (line.startsWith("NICK"))
+			return NICK.restore(sender, line);
+		if (line.startsWith("ERROR"))
+			return PUT_ERROR.restore(line);
+		throw new DecodeError("Unknown command");
 	}
 
 	public abstract String encode();
@@ -40,17 +39,19 @@ public abstract class Command extends Model {
 	// NICK <username>
 	public static class NICK extends Command {
 		private String _name;
+		protected RemoteAdapter _sender;
 
-		public NICK(String name) {
+		public NICK(String name, RemoteAdapter sender) {
 			_name = name;
+			_sender = sender;
 		}
 
 		public String getName() {
 			return _name;
 		}
 
-		public static Command restore(String line) {
-			return new NICK(line.substring(4).trim());
+		public static Command restore(RemoteAdapter sender, String line) {
+			return new NICK(line.substring(4).trim(), sender);
 		}
 
 		@Override
@@ -65,7 +66,7 @@ public abstract class Command extends Model {
 
 		@Override
 		public void received(Controller ctrl) {
-
+			ctrl.setNickName(_sender, getName());
 		}
 	}
 
@@ -73,9 +74,11 @@ public abstract class Command extends Model {
 	// SAY <username>:<message>
 	public static class SAY extends Command {
 		static final Pattern SAY_RECV_PATTERN = Pattern.compile("SAY <(.+?)>:(.*)");
+		RemoteAdapter _sender;
 
-		public SAY(String message) {
+		public SAY(String message, RemoteAdapter sender) {
 			_message = message;
+			_sender = sender;
 		}
 
 		protected String _message;
@@ -89,12 +92,12 @@ public abstract class Command extends Model {
 			return String.format("<SAY: %s>", this.getMessage());
 		}
 
-		public static Command restore(String line) {
+		public static Command restore(RemoteAdapter sender, String line) {
 			Matcher recv = SAY_RECV_PATTERN.matcher(line);
 			if (recv.matches()) {
-				return new SAY_RECV(recv.group(1), recv.group(2));
+				return new SAY_RECV(recv.group(1), recv.group(2), sender);
 			} else {
-				return new SAY(line.substring(3).trim());
+				return new SAY(line.substring(3).trim(), sender);
 			}
 		}
 
@@ -105,8 +108,8 @@ public abstract class Command extends Model {
 				return _user;
 			}
 
-			public SAY_RECV(String user, String msg) {
-				super(msg);
+			public SAY_RECV(String user, String msg, RemoteAdapter sender) {
+				super(msg, sender);
 				_user = user;
 			}
 
@@ -133,7 +136,7 @@ public abstract class Command extends Model {
 
 		@Override
 		public void received(Controller ctrl) {
-			getLog().warning("Unexpected SAY(send) command received. " + this);
+			ctrl.said(_sender, getMessage());
 		}
 
 	}
@@ -141,15 +144,16 @@ public abstract class Command extends Model {
 	// PUT <x> <y>
 	// PUT ERROR <errno>
 	public static class PUT extends Command {
-		static final Pattern PUT_ERROR_PATTERN = Pattern.compile("PUT ERROR (\\d)");
 		// TODO: Check format
 		static final Pattern PUT_PATTERN = Pattern.compile("PUT (\\d) (\\d)"); //
 
 		private int _x, _y;
+		private RemoteAdapter _sender;
 
-		public PUT(int x, int y) {
+		public PUT(int x, int y, RemoteAdapter sender) {
 			_x = x;
 			_y = y;
+			_sender = sender;
 		}
 
 		public int getX() {
@@ -160,12 +164,12 @@ public abstract class Command extends Model {
 			return _y;
 		}
 
-		public static Command restore(String line) {
+		public static Command restore(RemoteAdapter sender, String line) {
 			Matcher put = PUT_PATTERN.matcher(line);
 			if (put.matches()) {
 				int x = Integer.parseInt(put.group(1));
 				int y = Integer.parseInt(put.group(2));
-				return new PUT(x, y);
+				return new PUT(x, y, sender);
 			} else {
 				getClassLogger().warning(String.format("Invalid PUT command received. [%s]", line));
 				return Command.VOID;
@@ -175,7 +179,6 @@ public abstract class Command extends Model {
 		@Override
 		public String toString() {
 			return String.format("<PUT (%d, %d)>", getX(), getY());
-			
 		}
 
 		@Override
@@ -185,7 +188,7 @@ public abstract class Command extends Model {
 
 		@Override
 		public void received(Controller ctrl) {
-			getLog().warning("Unexpected PUT command received : " + this);
+			ctrl.putBy(_sender, _x, _y);
 		}
 
 	}
@@ -243,8 +246,9 @@ public abstract class Command extends Model {
 			StringTokenizer tokenizer = new StringTokenizer(boardData, " ");
 			int tokenCount = 0;
 			if ((tokenCount = tokenizer.countTokens()) != Board.CELLS) {
-				getClassLogger().warning(String.format("Invalid BOARD data, content length expecded %d but received %d",
-						Board.CELLS, tokenCount));
+				getClassLogger().warning(
+						String.format("Invalid BOARD data, content length expecded %d but received %d", Board.CELLS,
+								tokenCount));
 				return Command.VOID;
 			}
 			Board content = new Board();
@@ -350,8 +354,24 @@ public abstract class Command extends Model {
 	// END
 	// and follows game result
 	public static class END extends Command {
+		static final Pattern END_PATTERN = Pattern.compile("END (.*)");
+		String _message;
+
+		public END(String msg) {
+			_message = msg;
+		}
+		
+		public String getMessage() {
+			return _message;
+		}
+
 		public static Command restore(String line) {
-			return new END();
+			Matcher match = END_PATTERN.matcher(line);
+			if (match.matches()) {
+				return new END(match.group(1));
+			} else {
+				return Command.VOID;
+			}
 		}
 
 		@Override
@@ -361,7 +381,7 @@ public abstract class Command extends Model {
 
 		@Override
 		public void received(Controller ctrl) {
-			ctrl.endGame("");
+			ctrl.endGame(getMessage());
 		}
 
 		@Override
