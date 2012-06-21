@@ -45,4 +45,16 @@ public class UserPlayer extends Player {
 			_controller.showMessage("NOT YOUR TURN!!");
 	}
 
+	@Override
+	public void onStart(Game game) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFinish(Game game) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

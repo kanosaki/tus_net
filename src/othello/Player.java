@@ -5,6 +5,9 @@ import othello.Board.CellState;
 public abstract class Player extends Model {
 	private CellState _myColor;
 	public abstract void playTurn(Board board, Game game);
+	public abstract void onStart(Game game);
+	public abstract void onFinish(Game game);
+	
 	public CellState getColor(){
 		return _myColor;
 	}

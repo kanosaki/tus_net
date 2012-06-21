@@ -51,6 +51,7 @@ public class RemoteAdapter extends Model {
 					while ((next = _sendBuffer.poll()) != null) {
 						if (this.isInterrupted())
 							return;
+						onMessageSending(next);
 						String line = next.encode();
 						_output.write(line + "\n");
 						_output.flush();
@@ -137,6 +138,10 @@ public class RemoteAdapter extends Model {
 	protected void onMessageReceived(Command msg) {
 		getLog().info("RECEIVED: " + msg);
 		_onMessageReceived.fire(msg);
+	}
+	
+	protected void onMessageSending(Command msg) {
+		getLog().info("SENDING: " + msg);
 	}
 
 	public void addMessageListener(Listener<Command> listener) {

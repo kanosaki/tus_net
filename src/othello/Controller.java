@@ -98,4 +98,9 @@ public class Controller {
 		
 	}
 
+	public void nick(String string) {
+		Command nick = new Command.NICK(string, _remote);
+		_remote.send(nick);
+	}
+
 }

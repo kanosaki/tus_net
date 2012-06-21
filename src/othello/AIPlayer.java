@@ -24,7 +24,23 @@ public abstract class AIPlayer extends Player {
 	}
 
 	@Override
+	public void onStart(Game game) {
+		_controller.nick("Simpson");
+		_controller.say("Let's enjoy the game!");
+	}
+	
+	@Override
+	public void onFinish(Game game) {
+		_controller.say("Thank you for playing.");
+
+	}
+
+	protected void phaseHandle(Board board, Game game) {
+	}
+
+	@Override
 	public void playTurn(Board board, Game game) {
+		phaseHandle(board, game);
 		_controller.pushMessage(String.format("AI is thinking..."));
 		Point next = think(board, game);
 		_controller.pushMessage(String.format("Done, (%s, %s)", next.x, next.y));

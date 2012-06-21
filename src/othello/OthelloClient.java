@@ -49,6 +49,11 @@ public class OthelloClient extends Model{
 			System.exit(-1);
 		}
 	}
+	
+	protected Game newGame(RemoteAdapter adapter) {
+		
+		return null;
+	}
 
 	protected Controller createController() {
 		return new Controller();
