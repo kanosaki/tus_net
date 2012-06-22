@@ -34,7 +34,7 @@ public class Debug extends Model {
 	
 	public static Debug getInstance() {
 		if (_instance == null)
-			_instance = new Debug(true);
+			_instance = new Debug(false);
 		return _instance;
 	}
 	

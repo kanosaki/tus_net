@@ -2,8 +2,6 @@ package othello;
 
 import java.awt.EventQueue;
 import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.logging.Logger;
 
 /***
  * A model class for othello client
@@ -35,7 +33,6 @@ public class OthelloClient extends Model{
 	}
 
 	public void start() {
-		Debug.getInstance().showFrame();
 		_mainFrame.setVisible(true);
 		this.connect(getRemoteHost(), getRemotePort());
 	}

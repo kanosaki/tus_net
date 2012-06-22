@@ -1,9 +1,6 @@
 package othello;
 
 import java.awt.Point;
-import java.util.logging.Logger;
-
-import othello.Board.CellState;
 
 public class UserPlayer extends Player {
 	Controller _controller;
