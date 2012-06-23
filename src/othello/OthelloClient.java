@@ -1,6 +1,5 @@
 package othello;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 
 /***
@@ -8,7 +7,7 @@ import java.io.IOException;
  * 
  * @author \@kanosaki
  */
-public class OthelloClient extends Model{
+public class OthelloClient extends Model {
 	public static final String DEFAULT_HOST = "localhost";
 	public static final int DEFAULT_PORT = 9876;
 
@@ -26,13 +25,13 @@ public class OthelloClient extends Model{
 		setRemotePort(serverPort);
 		_mainFrame = new MainFrame(getController());
 		getController().setMainFrame(_mainFrame);
+	}
+
+	public void start() {
 		_game = this.createGame();
 		getController().setGame(_game);
 		_remote = this.createAdapter();
 		getController().setRemoteAdapter(_remote);
-	}
-
-	public void start() {
 		_mainFrame.setVisible(true);
 		this.connect(getRemoteHost(), getRemotePort());
 	}
@@ -46,9 +45,9 @@ public class OthelloClient extends Model{
 			System.exit(-1);
 		}
 	}
-	
+
 	protected Game newGame(RemoteAdapter adapter) {
-		
+
 		return null;
 	}
 
@@ -61,7 +60,7 @@ public class OthelloClient extends Model{
 	}
 
 	protected Game createGame() {
-		return new Game(this.createPlayer());
+		return new Game(createPlayer());
 	}
 
 	protected RemoteAdapter createAdapter() {
@@ -69,7 +68,7 @@ public class OthelloClient extends Model{
 		adapter.addMessageListener(new Listener<Command>() {
 			@Override
 			public void next(Command val) {
-				val.received(getController());
+				val.receivedClient(getController());
 			}
 		});
 		return adapter;
@@ -81,26 +80,6 @@ public class OthelloClient extends Model{
 
 	protected Controller getController() {
 		return _controller;
-	}
-
-	public static void main(String[] args) {
-		try {
-			Debug.initialize();
-			OthelloClient client = args.length == 2 ? new OthelloClient(args[1], Integer.parseInt(args[0]))
-					: new OthelloClient(DEFAULT_HOST, DEFAULT_PORT);
-			client.start();
-
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					getClassLogger().info("Starting AI Client...");
-					AI ai = new AI(DEFAULT_HOST, DEFAULT_PORT);
-					ai.start();
-				}
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	protected String getRemoteHost() {
@@ -124,14 +103,17 @@ public class OthelloClient extends Model{
 	}
 
 	public static class AI extends OthelloClient {
-		public AI(String serverHost, int serverPort) {
+		private Player _player;
+
+		public AI(String serverHost, int serverPort, AIPlayer.Strategy strategy) {
 			super(serverHost, serverPort);
+			_player = AIPlayer.create(getController(), strategy);
 			this.getController().showMessage("AI Mode");
 		}
 
 		@Override
 		protected Player createPlayer() {
-			return AIPlayer.create(getController(), AIPlayer.Strategy.Simple);
+			return _player;
 		}
 	}
 }

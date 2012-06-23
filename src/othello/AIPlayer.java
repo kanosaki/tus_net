@@ -72,6 +72,11 @@ public abstract class AIPlayer extends Player {
 
 		@Override
 		public Point think(Board board, Game game) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			for (int x = 0; x < Board.SIZE; x++) {
 				for (int y = 0; y < Board.SIZE; y++) {
 					if (board.canPut(x, y, this.getColor())) {

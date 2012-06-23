@@ -24,5 +24,16 @@ public abstract class Player extends Model {
 	public void setColor(CellState color) {
 		_myColor = color;
 	}
+	
+	public int getCode(){
+		switch (getColor()) {
+		case Black:
+			return 1;
+		case White:
+			return -1;
+		default:
+			throw new AssertionError();
+		}
+	}
 
 }

@@ -15,22 +15,29 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.logging.LogRecord;
+
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.BoxLayout;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
 
-public class Main {
+import othello.AIPlayer.Strategy;
 
+public class Main extends Model {
+	private static final boolean DEBUG_MODE = true;
 	private JFrame _frame;
 	private final JPanel panel_1 = new JPanel();
 	private JTextField _bindPortText;
 	private JTextField _serverHostText;
 	private JTextField _serverPortText;
 	private JComboBox _comboBox;
-	private JList _list;
+	private JList _debugList;
+	private DefaultListModel _debugListModel;
 
 	/**
 	 * Launch the application.
@@ -49,20 +56,102 @@ public class Main {
 		});
 	}
 
-	protected void startClient() {
+	private void showMessage(String msg) {
 
 	}
 
-	protected void startServer() {
+	protected void startClient() {
+		String host = _serverHostText.getText();
+		if (host.length() == 0) {
+			showMessage("Server Host is empty");
+			return;
+		}
+		String portExpr = _serverPortText.getText();
+		if (portExpr.length() == 0) {
+			showMessage("Server port is empty.");
+			return;
+		}
+		int port = 0;
+		try {
+			port = Integer.parseInt(portExpr);
+		} catch (NumberFormatException ex) {
+			showMessage("Invalid number format at Server port");
+			return;
+		}
+		if (port < 1024 || 65535 < port) {
+			showMessage("Invalid number is specified at Server port, port must be in between 1024 and 65535");
+			return;
+		}
+		OthelloClient client = new OthelloClient(host, port);
+		client.start();
+	}
 
+	protected void startServer() {
+		String portExpr = _bindPortText.getText();
+		if (portExpr.length() == 0) {
+			showMessage("Server port is not given.");
+			return;
+		}
+		int port = 0;
+		try {
+			port = Integer.parseInt(portExpr);
+		} catch (NumberFormatException ex) {
+			showMessage("Invalid number format at Server port");
+			return;
+		}
+		if (port < 1024 || 65535 < port) {
+			showMessage("Invalid number is specified at Server port, port must be in between 1024 and 65535");
+			return;
+		}
+
+		OthelloServer server = new OthelloServer(port);
+		try {
+			server.start();
+		} catch (IOException e) {
+			showMessage(e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	/**
 	 * Create the application.
 	 */
 	public Main() {
+		setLoggerName(getClass().getSimpleName());
+		_debugListModel = new DefaultListModel();
+		initDebugger();
 		initialize();
-		
+		getLog().info("Ready.");
+		if (DEBUG_MODE)
+			debugMode();
+	}
+
+	private void debugMode() {
+		getLog().info("DEBUG MODE");
+		String host = "localhost";
+		int port = 9876;
+		OthelloServer server = new OthelloServer(port);
+		try {
+			server.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		OthelloClient user = new OthelloClient(host, port);
+		user.start();
+		OthelloClient ai = new OthelloClient.AI(host, port, Strategy.Simple);
+		ai.start();
+	}
+
+	private void initDebugger() {
+		Debug debug = Debug.getInstance();
+		debug.addOnNextListener(new Listener<LogRecord>() {
+			@Override
+			public void next(LogRecord val) {
+				String msg = String.format("[%s - %s] : %s", val.getLevel(), val.getLoggerName(), val.getMessage());
+				_debugListModel.addElement(msg);
+			}
+		});
 	}
 
 	/**
@@ -70,7 +159,7 @@ public class Main {
 	 */
 	private void initialize() {
 		_frame = new JFrame();
-		_frame.setBounds(100, 100, 568, 359);
+		_frame.setBounds(100, 100, 755, 543);
 		_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		_frame.getContentPane().setLayout(new BoxLayout(_frame.getContentPane(), BoxLayout.X_AXIS));
 
@@ -212,8 +301,8 @@ public class Main {
 		_frame.getContentPane().add(panel_1);
 		panel_1.setLayout(new BorderLayout(0, 0));
 
-		_list = new JList();
-		panel_1.add(_list, BorderLayout.CENTER);
+		_debugList = new JList(_debugListModel);
+		panel_1.add(_debugList, BorderLayout.CENTER);
 	}
 
 }

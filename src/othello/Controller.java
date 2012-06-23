@@ -80,24 +80,7 @@ public class Controller {
 	Game getGame() {
 		return _game;
 	}
-
 	
-	
-	public void said(RemoteAdapter sender, String message) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void setNickName(RemoteAdapter sender, String name) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void putBy(RemoteAdapter sender, int x, int y) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	public void nick(String string) {
 		Command nick = new Command.NICK(string, _remote);
 		_remote.send(nick);

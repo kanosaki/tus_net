@@ -6,21 +6,25 @@ import java.util.logging.Logger;
 public class Debug extends Model {
 	private static final String DEFAULT_LOGGER_NAME = "DebugConsole";
 	private static Logger _classLogger = Logger.getLogger(DEFAULT_LOGGER_NAME);
-
+	
 	private Logger _instanceLogger;
-	protected static Logger getClassLogger(){
+	private Signal<LogRecord> _onNextLog;
+	
+	protected static Logger getClassLogger() {
 		return _classLogger;
 	}
-	protected Logger getLog(){
-		if(_instanceLogger == null)
+
+	protected Logger getLog() {
+		if (_instanceLogger == null)
 			return _classLogger;
 		else
 			return _instanceLogger;
 	}
-	public void setLoggerName(String name){
-		_instanceLogger = Logger.getLogger(DEFAULT_LOGGER_NAME + "#" + name); 
+
+	public void setLoggerName(String name) {
+		_instanceLogger = Logger.getLogger(DEFAULT_LOGGER_NAME + "#" + name);
 	}
-	
+
 	private static Debug _instance;
 	private DebugFrame _frame;
 	private LogHandler _logHandler;
@@ -30,14 +34,15 @@ public class Debug extends Model {
 			this.initFrame();
 		this.initLogger();
 		getLog().finest("Debug Console Ready.");
+		_onNextLog = new Signal<LogRecord>();
 	}
-	
+
 	public static Debug getInstance() {
 		if (_instance == null)
 			_instance = new Debug(false);
 		return _instance;
 	}
-	
+
 	static void setInstance(Debug dbg) {
 		_instance = dbg;
 	}
@@ -58,16 +63,17 @@ public class Debug extends Model {
 	}
 
 	public void showFrame() {
-		this.initFrame();
-		_frame.setVisible(true);
+		if (_frame != null)
+			_frame.setVisible(true);
 	}
 
 	public DebugFrame getFrame() {
-		this.initFrame();
 		return _frame;
 	}
-
 	
+	public void addOnNextListener(Listener<LogRecord> listener){
+		_onNextLog.addListener(listener);
+	}
 
 	class LogHandler extends java.util.logging.Handler {
 
@@ -82,8 +88,10 @@ public class Debug extends Model {
 
 		@Override
 		public void publish(LogRecord record) {
-			getFrame().pushLog(record);
-
+			DebugFrame frame = getFrame();
+			if(frame != null)
+				frame.pushLog(record);
+			_onNextLog.fire(record);
 		}
 
 	}

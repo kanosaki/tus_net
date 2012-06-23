@@ -60,8 +60,9 @@ public class BoardView extends JPanel {
 		_onClicked.addListener(listener);
 	}
 
-	public void paintComponent(Graphics g) {
-		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	public void paintComponent(Graphics gg) {
+		Graphics2D g = (Graphics2D)gg;
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		super.paintComponent(g);
 		g.setColor(getBoardBaseColor());
 		g.fillRect(PADDING_X, PADDING_Y, CELL_SIZE * Board.SIZE, CELL_SIZE * Board.SIZE);

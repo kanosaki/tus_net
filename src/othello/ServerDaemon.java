@@ -5,13 +5,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ConnectionManager extends Model {
+public class ServerDaemon extends Model {
 	private Signal<Lobby> _onLobbyMatched;
-	private ArrayList<Lobby> _lobbies;
 	private Daemon _waitDaemon;
 	private int _waitPort;
+	private int _nextId;
 
-	public ConnectionManager(int waitport) throws IOException {
+	public ServerDaemon(int waitport) throws IOException {
+		_nextId = 0;
 		_onLobbyMatched = new Signal<Lobby>();
 		_waitPort = waitport;
 		_waitDaemon = new Daemon();
@@ -23,6 +24,10 @@ public class ConnectionManager extends Model {
 
 	public void start() {
 		_waitDaemon.start();
+	}
+
+	private int getNextLobbyID() {
+		return _nextId++;
 	}
 
 	private class Daemon extends Thread {
@@ -38,13 +43,12 @@ public class ConnectionManager extends Model {
 			try {
 				while (true) {
 					Socket sock = _sock.accept();
-					if(waiting == null) {
-						waiting = new Lobby(_lobbies.size());
-						waiting.addConnection(sock);
-					} else {
-						waiting.addConnection(sock);
+					if (waiting == null) {
+						waiting = new Lobby(getNextLobbyID());
+					}
+					waiting.addConnection(sock);
+					if (waiting.isReady()) {
 						_onLobbyMatched.fire(waiting);
-						_lobbies.add(waiting);
 						waiting = null;
 					}
 				}

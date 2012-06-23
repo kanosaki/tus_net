@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RemoteAdapter extends Model {
 	private Signal<Command> _onMessageReceived;
+	private Signal<RemoteAdapter> _onConnectionClosing;
 
 	private BufferedReader _input;
 	private BufferedWriter _output;
@@ -24,9 +25,11 @@ public class RemoteAdapter extends Model {
 
 	public RemoteAdapter() {
 		_onMessageReceived = new Signal<Command>();
+		_onConnectionClosing = new Signal<RemoteAdapter>();
 	}
 	
 	public RemoteAdapter(int id) {
+		this();
 		_ID = id;
 	}
 
@@ -146,6 +149,10 @@ public class RemoteAdapter extends Model {
 
 	public void addMessageListener(Listener<Command> listener) {
 		_onMessageReceived.addListener(listener);
+	}
+	
+	public void addOnConnectionClosing(Listener<RemoteAdapter> listener){
+		_onConnectionClosing.addListener(listener);
 	}
 
 	public String getRemoteHost() {

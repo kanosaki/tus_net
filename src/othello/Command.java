@@ -34,7 +34,9 @@ public abstract class Command extends Model {
 
 	public abstract String encode();
 
-	public abstract void received(Controller ctrl);
+	public abstract void receivedClient(Controller ctrl);
+
+	public abstract void receivedServer(Lobby lobby);
 
 	// NICK <username>
 	public static class NICK extends Command {
@@ -65,8 +67,13 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
-			ctrl.setNickName(_sender, getName());
+		public void receivedClient(Controller ctrl) {
+			getLog().warning("Client mode not supports " + this);
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			lobby.setNickName(_sender, getName());
 		}
 	}
 
@@ -124,8 +131,13 @@ public abstract class Command extends Model {
 			}
 
 			@Override
-			public void received(Controller ctrl) {
+			public void receivedClient(Controller ctrl) {
 				ctrl.said(this.getUser(), this.getMessage());
+			}
+
+			@Override
+			public void receivedServer(Lobby lobby) {
+				getLog().warning("Server has received named say command.");
 			}
 		}
 
@@ -135,8 +147,13 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
-			ctrl.said(_sender, getMessage());
+		public void receivedClient(Controller ctrl) {
+			getLog().warning("Client mode not supports " + this);
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			lobby.said(_sender, getMessage());
 		}
 
 	}
@@ -187,8 +204,13 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
-			ctrl.putBy(_sender, _x, _y);
+		public void receivedClient(Controller ctrl) {
+			getLog().warning("Client mode not supports " + this);
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			lobby.put(_sender, _x, _y);
 		}
 
 	}
@@ -228,8 +250,13 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.error(getCode());
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -303,13 +330,18 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.updateBoard(_board);
 		}
 
 		@Override
 		public String toString() {
 			return "<BOARD>";
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -341,13 +373,18 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.turnChange(this.getCode());
 		}
 
 		@Override
 		public String toString() {
 			return String.format("<TURN %d>", this.getCode());
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -360,7 +397,7 @@ public abstract class Command extends Model {
 		public END(String msg) {
 			_message = msg;
 		}
-		
+
 		public String getMessage() {
 			return _message;
 		}
@@ -376,17 +413,22 @@ public abstract class Command extends Model {
 
 		@Override
 		public String encode() {
-			return "END";
+			return "END " + _message;
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.endGame(getMessage());
 		}
 
 		@Override
 		public String toString() {
 			return String.format("<END>");
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -418,13 +460,18 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.startGame(this.getCode());
 		}
 
 		@Override
 		public String toString() {
 			return String.format("<START %d>", this.getCode());
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -440,13 +487,18 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
+		public void receivedClient(Controller ctrl) {
 			ctrl.close();
 		}
 
 		@Override
 		public String toString() {
 			return "<CLOSE>";
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("Server mode not supports " + this);
 		}
 	}
 
@@ -458,13 +510,18 @@ public abstract class Command extends Model {
 		}
 
 		@Override
-		public void received(Controller ctrl) {
-			getLog().warning("VoidMessage.received has been called.");
+		public void receivedClient(Controller ctrl) {
+			getLog().warning("VoidMessage.receivedClient has been called.");
 		}
 
 		@Override
 		public String toString() {
 			return "<VOID>";
+		}
+
+		@Override
+		public void receivedServer(Lobby lobby) {
+			getLog().warning("VoidMessage.receivedServer has been called.");
 		}
 
 	}
