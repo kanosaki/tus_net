@@ -3,55 +3,55 @@ package othello;
 import java.awt.Point;
 
 public class UserPlayer extends Player {
-	Controller _controller;
-	boolean _isMyTurn = false;
+    Controller _controller;
+    boolean _isMyTurn = false;
 
-	public UserPlayer(Controller controller, BoardView view) {
-		_controller = controller;
-		view.addOnClickedListender(new Listener<Point>() {
-			@Override
-			public void next(Point val) {
-				putStone(val.x, val.y);
-			}
-		});
-	}
+    public UserPlayer(Controller controller, BoardView view) {
+        _controller = controller;
+        view.addOnClickedListender(new Listener<Point>() {
+            @Override
+            public void next(Point val) {
+                putStone(val.x, val.y);
+            }
+        });
+    }
 
-	public boolean isMyTurn() {
-		return _isMyTurn;
-	}
+    public boolean isMyTurn() {
+        return _isMyTurn;
+    }
 
-	@Override
-	public void playTurn(Board board, Game game) {
-		_isMyTurn = true;
-	}
+    @Override
+    public void playTurn(Board board, Game game) {
+        _isMyTurn = true;
+    }
 
-	private boolean checkPutting(int x, int y) {
-		Board board = _controller.getGame().getBoard();
-		return board.canPut(x, y, getColor());
-	}
+    private boolean checkPutting(int x, int y) {
+        Board board = _controller.getGame().getBoard();
+        return board.canPut(x, y, getColor());
+    }
 
-	private void putStone(int x, int y) {
-		if (_isMyTurn) {
-			if (checkPutting(x, y)) {
-				_controller.putStone(x, y);
-				_isMyTurn = false;
-			} else {
-				_controller.showMessage("YOU CAANNOT PUT THERE.");
-			}
-		} else
-			_controller.showMessage("NOT YOUR TURN!!");
-	}
+    private void putStone(int x, int y) {
+        if (_isMyTurn) {
+            if (checkPutting(x, y)) {
+                _controller.putStone(x, y);
+                _isMyTurn = false;
+            } else {
+                _controller.showMessage("YOU CAANNOT PUT THERE.");
+            }
+        } else
+            _controller.showMessage("NOT YOUR TURN!!");
+    }
 
-	@Override
-	public void onStart(Game game) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void onStart(Game game) {
+        // TODO Auto-generated method stub
+        
+    }
 
-	@Override
-	public void onFinish(Game game) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void onFinish(Game game) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }
