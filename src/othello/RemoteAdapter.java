@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class RemoteAdapter extends Model {
 	private Signal<Command> _onMessageReceived;
 	private Signal<RemoteAdapter> _onConnectionClosing;
+	private Signal<DecodeError> _onInvalidComand;
 
 	private BufferedReader _input;
 	private BufferedWriter _output;
@@ -26,8 +27,9 @@ public class RemoteAdapter extends Model {
 	public RemoteAdapter() {
 		_onMessageReceived = new Signal<Command>();
 		_onConnectionClosing = new Signal<RemoteAdapter>();
+		_onInvalidComand = new Signal<DecodeError>();
 	}
-	
+
 	public RemoteAdapter(int id) {
 		this();
 		_ID = id;
@@ -79,8 +81,14 @@ public class RemoteAdapter extends Model {
 					if (this.isInterrupted())
 						return;
 					String line = _input.readLine();
-					Command msg = decodeMessage(line);
-					onMessageReceived(msg);
+					Command msg;
+					try {
+						msg = decodeMessage(line);
+						onMessageReceived(msg);
+					} catch (DecodeError e) {
+						_onInvalidComand.fire(e);
+						getLog().warning("Message decoding failed. " + e.getMessage());
+					}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -89,23 +97,19 @@ public class RemoteAdapter extends Model {
 			}
 		}
 
-		protected Command decodeMessage(String line) {
-			try {
-				Command msg = Command.decode(line, RemoteAdapter.this);
-				if (msg == null) {
-					getLog().warning("Message decoding failed. Decoder returned null.");
-					getLog().warning("Data: " + line);
-					return Command.VOID;
-				}
-				if (msg == Command.VOID) {
-					getLog().warning("Message decoding failed. Decoder returned VOID message");
-					getLog().warning("Data: " + line);
-				}
-				return msg;
-			} catch (Exception e) {
-				getLog().warning("Message decoding failed. " + e.getMessage());
+		protected Command decodeMessage(String line) throws DecodeError {
+			Command msg = Command.decode(line, RemoteAdapter.this);
+			if (msg == null) {
+				getLog().warning("Message decoding failed. Decoder returned null.");
+				getLog().warning("Data: " + line);
+				return Command.VOID;
 			}
-			return Command.VOID;
+			if (msg == Command.VOID) {
+				getLog().warning("Message decoding failed. Decoder returned VOID message");
+				getLog().warning("Data: " + line);
+			}
+			return msg;
+
 		}
 	}
 
@@ -124,7 +128,7 @@ public class RemoteAdapter extends Model {
 		_reciever.start();
 		getLog().info("RemoteAdapter started.");
 	}
-	
+
 	public void start(String host, int port) throws IOException {
 		setRemoteHost(host);
 		setRemotePort(port);
@@ -142,7 +146,7 @@ public class RemoteAdapter extends Model {
 		getLog().info("RECEIVED: " + msg);
 		_onMessageReceived.fire(msg);
 	}
-	
+
 	protected void onMessageSending(Command msg) {
 		getLog().info("SENDING: " + msg);
 	}
@@ -150,9 +154,13 @@ public class RemoteAdapter extends Model {
 	public void addMessageListener(Listener<Command> listener) {
 		_onMessageReceived.addListener(listener);
 	}
-	
-	public void addOnConnectionClosing(Listener<RemoteAdapter> listener){
+
+	public void addOnConnectionClosing(Listener<RemoteAdapter> listener) {
 		_onConnectionClosing.addListener(listener);
+	}
+
+	public void addInvalidCommand(Listener<DecodeError> listener) {
+		_onInvalidComand.addListener(listener);
 	}
 
 	public String getRemoteHost() {
