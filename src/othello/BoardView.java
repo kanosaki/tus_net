@@ -30,7 +30,7 @@ public class BoardView extends JPanel {
             public void mousePressed(MouseEvent e) {
                 Point p = toLogicalPoint(e.getPoint());
                 if (BOARD_AREA.contains(e.getPoint()) && isNotNearGrid(e.getPoint()))
-                    _onClicked.fire(p);
+                    _onClicked.fireAsync(p);
             }
         });
     }

@@ -48,7 +48,7 @@ public class ServerDaemon extends Model {
                     }
                     waiting.addConnection(sock);
                     if (waiting.isReady()) {
-                        _onLobbyMatched.fire(waiting);
+                        _onLobbyMatched.fireAsync(waiting);
                         waiting = null;
                     }
                 }

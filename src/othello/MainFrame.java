@@ -38,11 +38,11 @@ public class MainFrame extends JFrame {
 
         _connectMenuItem = new JMenuItem("Connect...");
         _connectMenuItem.addActionListener(new ActionListener() {
-            
+
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 // TODO Auto-generated method stub
-                
+
             }
         });
         _menu.add(_connectMenuItem);
@@ -111,12 +111,22 @@ public class MainFrame extends JFrame {
         this.setMessage("Ready.");
     }
 
-    public void pushMessage(String msg){
-        ta.append(msg + "\n");
+    public void pushMessage(String msg) {
+        SwingUtilities.invokeLater(new RunnableContainer<String>(msg) {
+            @Override
+            void work(String arg) {
+                ta.append(arg + "\n");
+            }
+        });
     }
-    
+
     public void setMessage(String msg) {
-        label.setText(msg);
+        SwingUtilities.invokeLater(new RunnableContainer<String>(msg) {
+            @Override
+            void work(String arg) {
+                label.setText(arg);                
+            }
+        });
     }
 
     public void setChatMessage(String user, String msg) {

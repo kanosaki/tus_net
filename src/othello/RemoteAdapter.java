@@ -86,7 +86,7 @@ public class RemoteAdapter extends Model {
 						msg = decodeMessage(line);
 						onMessageReceived(msg);
 					} catch (DecodeError e) {
-						_onInvalidComand.fire(e);
+						_onInvalidComand.fireAsync(e);
 						getLog().warning("Message decoding failed. " + e.getMessage());
 					}
 				}
@@ -144,7 +144,7 @@ public class RemoteAdapter extends Model {
 
 	protected void onMessageReceived(Command msg) {
 		getLog().info("RECEIVED: " + msg);
-		_onMessageReceived.fire(msg);
+		_onMessageReceived.fireAsync(msg);
 	}
 
 	protected void onMessageSending(Command msg) {

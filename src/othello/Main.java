@@ -22,6 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.BoxLayout;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
@@ -142,14 +143,23 @@ public class Main extends Model {
         OthelloClient ai = new OthelloClient.AI(host, port, Strategy.Simple);
         ai.start();
     }
+    
+    private void pushLog(LogRecord val) {
+        String msg = String.format("[%s - %s] : %s", val.getLevel(), val.getLoggerName(), val.getMessage());
+        SwingUtilities.invokeLater(new RunnableContainer<String>(msg) {
+            @Override
+            void work(String arg) {
+                _debugListModel.addElement(arg);
+            }
+        });
+    }
 
     private void initDebugger() {
         Debug debug = Debug.getInstance();
         debug.addOnNextListener(new Listener<LogRecord>() {
             @Override
             public void next(LogRecord val) {
-                String msg = String.format("[%s - %s] : %s", val.getLevel(), val.getLoggerName(), val.getMessage());
-                _debugListModel.addElement(msg);
+                pushLog(val);
             }
         });
     }
