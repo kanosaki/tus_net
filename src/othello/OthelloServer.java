@@ -23,5 +23,6 @@ public class OthelloServer extends Model {
             }
         });
         _daemon.start();
+        getLog().info("Server started");
     }
 }

@@ -4,7 +4,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Signal<T> {
     private static ExecutorService _pool = Executors.newCachedThreadPool();
@@ -21,12 +20,14 @@ public class Signal<T> {
     }
 
     public synchronized void fireAsync(T value) {
-        _pool.execute(new RunnableContainer<T>(value) {
-            @Override
-            void work(T arg) {
-                fire(arg);
-            }
-        });
+        for (Listener<T> listener : _listeners) {
+            _pool.execute(new RunnableContainer.Two<Listener<T>, T>(listener, value) {
+                @Override
+                void work(Listener<T> arg1, T arg2) {
+                    arg1.next(arg2);
+                }
+            });
+        }
     }
 
     public synchronized void addListener(Listener<T> listener) {

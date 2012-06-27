@@ -52,6 +52,7 @@ public class Lobby extends Model {
     }
 
     public void startGame() {
+        getLog().info("Game started " + _lobbyID);
         _board = new Board();
         _board.setAutoFlip(true);
         Enumeration<ServerPlayer> players = _playerMap.elements();
@@ -108,6 +109,10 @@ public class Lobby extends Model {
 
     protected void turnChange() {
         ServerPlayer nextPlayer = _currentPlayer.next();
+        if(!_board.canPutAny(nextPlayer.getColor())) {
+            getLog().info(String.format("%s can put nowhere!", nextPlayer.getName()));
+            turnChange();
+        }
         for (ServerPlayer player : getPlayers()) {
             player.tellTurn(nextPlayer.getCode());
         }

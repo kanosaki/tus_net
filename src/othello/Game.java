@@ -47,6 +47,7 @@ public class Game extends Model {
 
     public void turnChange(int turn) {
         _turn++;
+        System.out.println("Turn " + _turn);
         if (isMyTurn(turn)) {
             _player.playTurn(_board, this);
         }

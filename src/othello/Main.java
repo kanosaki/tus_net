@@ -30,13 +30,13 @@ import javax.swing.border.BevelBorder;
 import othello.AIPlayer.Strategy;
 
 public class Main extends Model {
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
     private JFrame _frame;
     private final JPanel panel_1 = new JPanel();
     private JTextField _bindPortText;
     private JTextField _serverHostText;
     private JTextField _serverPortText;
-    private JComboBox _comboBox;
+    private JComboBox _clientMode;
     private JList _debugList;
     private DefaultListModel _debugListModel;
 
@@ -58,7 +58,7 @@ public class Main extends Model {
     }
 
     private void showMessage(String msg) {
-
+        getLog().info(msg);
     }
 
     protected void startClient() {
@@ -83,8 +83,15 @@ public class Main extends Model {
             showMessage("Invalid number is specified at Server port, port must be in between 1024 and 65535");
             return;
         }
-        OthelloClient client = new OthelloClient(host, port);
-        client.start();
+        getLog().info("Staring client..");
+        if(_clientMode.getSelectedIndex() == 0) {
+            OthelloClient client = new OthelloClient(host, port);
+            client.start();    
+        } else if (_clientMode.getSelectedIndex() == 1) {
+            OthelloClient client = new OthelloClient.AI(host, port, Strategy.Simple);
+            client.start();
+        }
+        
     }
 
     protected void startServer() {
@@ -106,6 +113,7 @@ public class Main extends Model {
         }
 
         OthelloServer server = new OthelloServer(port);
+        getLog().info("Starting server at " + port);
         try {
             server.start();
         } catch (IOException e) {
@@ -238,15 +246,15 @@ public class Main extends Model {
         gbc_lblPlayer.gridy = 3;
         clientWrap.add(lblPlayer, gbc_lblPlayer);
 
-        _comboBox = new JComboBox();
-        _comboBox.setModel(new DefaultComboBoxModel(new String[] { "User", "AI - Simple" }));
-        _comboBox.setSelectedIndex(0);
+        _clientMode = new JComboBox();
+        _clientMode.setModel(new DefaultComboBoxModel(new String[] { "User", "AI - Simple" }));
+        _clientMode.setSelectedIndex(0);
         GridBagConstraints gbc__comboBox = new GridBagConstraints();
         gbc__comboBox.insets = new Insets(0, 0, 5, 0);
         gbc__comboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc__comboBox.gridx = 2;
         gbc__comboBox.gridy = 3;
-        clientWrap.add(_comboBox, gbc__comboBox);
+        clientWrap.add(_clientMode, gbc__comboBox);
 
         JButton btnConnect = new JButton("Connect");
         btnConnect.addActionListener(new ActionListener() {

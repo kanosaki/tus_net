@@ -3,6 +3,8 @@ package othello;
 import java.awt.Color;
 import java.util.HashMap;
 
+import othello.Board.CellState;
+
 public class Board extends Model {
     public static final int SIZE = 8;
     public static final int CELLS = SIZE * SIZE;
@@ -184,5 +186,16 @@ public class Board extends Model {
         }
         String winner = blacks > whites ? blacksName : whitesName;
         return String.format("%s won. %s -> %s, %s -> %s", winner, blacksName, blacks, whitesName, whites);
+    }
+
+    public boolean canPutAny(CellState color) {
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = 0; y < SIZE; y++) {
+                if(canPut(x, y, color)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
